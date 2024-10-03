@@ -1,0 +1,353 @@
+*******************************************************************************
+* JUnit Jupyter 5.7.2 Usage
+*******************************************************************************
+
+package org.zerock.myapp.persistence;
+
+--------------------------------------------------------------
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.Timeout;
+--------------------------------------------------------------
+
+
+// -------------------------------------------------------------------------------------- //
+// @TestMethodOrder
+// -------------------------------------------------------------------------------------- //
+//	is a type-level annotation that is used to configure "MethodOrderer (Java Interface)"
+//	for the test methods of the annotated test class or test interface.
+// -------------------------------------------------------------------------------------- //
+// (1) MethodOrderer.MethodName
+//	   To sort methods alphanumerically based on their * names * using * String.compareTo(String) *.
+//
+// (2) MethodOrderer.DisplayName
+//	   To sort methods alphanumerically based on their * display names * using * String.compareTo(String) *.
+//
+// (3) MethodOrderer.OrderAnnotation
+//	   To sort methods based on the * @Order * annotation.
+//
+// (4) MethodOrderer.Random
+//	   By default, the random seed used for ordering methods is the value returned by * System.nanoTime() *
+//	   during static initialization of this class. In order to support repeatable builds, the value of the
+//	   default random seed is logged at INFO level.
+//
+// (5) MethodOrderer.Alphanumeric 		(* deprecated *)
+// -------------------------------------------------------------------------------------- //
+@TestMethodOrder(OrderAnnotation.class)
+
+
+// -------------------------------------------------------------------------------------- //
+// @TestInstance
+// -------------------------------------------------------------------------------------- //
+//	is a type-level annotation that is used to configure lifecycle of test instances
+// 	for the annotated test class or test interface.
+// -------------------------------------------------------------------------------------- //
+
+// ----------------------------------- //
+// Test instance lifecycle modes.
+// ----------------------------------- //
+
+// -------------------------
+// 1. Lifecycle.PER_CLASS
+// -------------------------
+//	When using this mode, a new test instance will be created once per test class.
+
+@TestInstance(Lifecycle.PER_CLASS)
+
+// -------------------------
+// 2. Lifecycle.PER_METHOD
+// -------------------------
+//	When using this mode, a new test instance will be created for each test method,
+//		 * test factory method, or test template method.
+
+@TestInstance(Lifecycle.PER_METHOD)
+
+
+class Boot01ApplicationTests {
+	
+
+
+	// ---------------------------------------------------------------------------------- //
+	// @BeforeAll
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to signal that the annotated method should be executed
+	//	before all tests in the current test class.
+	//
+	//	In contrast to @BeforeEach methods,
+	//	This methods are only executed once for a given test class.
+	// ---------------------------------------------------------------------------------- //
+	// 	(Caution) Method must be "static" unless the test class is annotated with
+	//				@TestInstance(Lifecycle.PER_CLASS).
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Method Signatures *
+	//
+ 	// 	1.	Methods must have a "void" return type,
+ 	// 	2.	Must "not" be "private", and must be "static" by default.
+ 	// 	3. 	Consequently, Methods are not supported in @Nested test classes or as interface default methods
+ 	//		unless the test class is annotated with @TestInstance(Lifecycle.PER_CLASS).
+ 	//	4. 	Methods may optionally declare parameters to be resolved
+ 	//		by org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers.
+	//
+	//
+	//	* Enumeration of test instance lifecycle modes *
+	//
+	//	1. 	Lifecycle.PER_CLASS
+	//		When using this mode, a new test instance will be created once per test class.
+	//
+	//	2. 	Lifecycle.PER_METHOD
+	//		When using this mode, a new test instance will be created for each
+	//			test method, test factory method, or test template method.
+	//
+	// ---------------------------------------------------------------------------------- //
+
+	@BeforeAll
+
+	static void beforeAll() {
+		log.debug("♥ beforeAll() invoked.");
+		
+	} // beforeAll
+
+
+
+	// ---------------------------------------------------------------------------------- //
+	// @BeforeEach
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to signal that the annotated method should be executed
+	//	before each
+	//		@Test, @RepeatedTest, @ParameterizedTest, @TestFactory, and @TestTemplate 
+	//	method in the current test class.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Method Signatures *
+	//
+	// 	1. 	Methods must have a "void" return type,
+	// 	2. 	Must "not" be "private", and must "not" be "static".
+	//	3. 	Methods may optionally declare parameters to be resolved 
+	//		by org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers.
+	// ---------------------------------------------------------------------------------- //
+
+	@BeforeEach
+
+	void beforeEach() {
+		log.debug("♥ beforeEach() invoked.");
+		
+	} // beforeEach
+	
+	
+
+	// ---------------------------------------------------------------------------------- //
+	// @Test
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to signal that the annotated method is a test method.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Method Signatures *
+	//
+	// 	1. 	Methods must "not" be "private" or "static"
+	//	2. 	Methods must "not" return a value.
+	// 	3. 	Methods may optionally declare parameters to be resolved
+	//		by org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers.
+	//	4. 	Methods may also be used as a meta-annotation in order to
+	//		create a custom composed annotation that inherits the semantics of @Test.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Test Execution Order *
+	//
+	//	By default, test methods will be ordered using an algorithm that is deterministic
+	//	but intentionally non-obvious.
+	//
+	//	This ensures that subsequent runs of a test suite execute test methods in the same order,
+	//	thereby allowing for repeatable builds.
+	//
+	//	In this context, a test method is any instance method that is directly annotated or meta-annotated
+	//	with @Test, @RepeatedTest, @ParameterizedTest, @TestFactory, or @TestTemplate.
+	//	
+	//	Although true unit tests typically should not rely on the order in which they are executed,
+	//	there are times when it is necessary to enforce a specific test method execution order --
+	//
+	//	for example,
+	//		when writing integration tests or functional tests
+	//		where the sequence of the tests is important,
+	//			especially in conjunction with @TestInstance(Lifecycle.PER_CLASS).
+	//
+	//	To control the order in which test methods are executed,
+	//	annotate your test class or test interface with @TestMethodOrder
+	//	and specify the desired MethodOrderer implementation.
+	// ---------------------------------------------------------------------------------- //
+
+	@Test
+
+	
+
+	// ---------------------------------------------------------------------------------- //
+	// @DisplayName
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to declare a custom display name for the annotated test class or test method.
+	//
+	//  Display names are typically used for test reporting in IDEs and build tools
+	//	and may contain spaces, special characters, and even emoji.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* A custom display name *
+	//
+	// 	1. never "blank" or
+	//	2. consisting solely of "whitespace"
+	// ---------------------------------------------------------------------------------- //
+
+	@DisplayName("To define a name displayed in the junit view")
+
+	
+
+	// ---------------------------------------------------------------------------------- //
+	// @Timeout
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to define a timeout for a method or all testable methods
+	//	within one class and its @Nested classes.
+ 	//
+ 	// 	This annotation may also be used on lifecycle methods annotated
+ 	//	with @BeforeAll, @BeforeEach, @AfterEach, or @AfterAll.
+ 	//
+ 	//	Applying this annotation to a test class has the same effect as applying it to all testable methods,
+ 	//		i.e. all methods annotated or meta-annotated with @Test, @TestFactory, or @TestTemplate, 
+ 	//			 but "not" to its "lifecycle" methods.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Default Timeouts *
+	//
+	// 	If this annotation is not present, no timeout will be used
+	//	unless a default timeout is defined via one of the following configuration parameters:
+	//
+ 	//		junit.jupiter.execution.timeout.default 					- Default timeout for all "testable" and "lifecycle" methods.
+ 	//		junit.jupiter.execution.timeout.testable.method.default 	- Default timeout for all "testable" methods.
+ 	//		junit.jupiter.execution.timeout.test.method.default			- Default timeout for "@Test" methods.
+ 	//		junit.jupiter.execution.timeout.testtemplate.method.default	- Default timeout for "@TestTemplate" methods.
+ 	//		junit.jupiter.execution.timeout.testfactory.method.default 	- Default timeout for "@TestFactory" methods.
+ 	//		junit.jupiter.execution.timeout.lifecycle.method.default 	- Default timeout for all "lifecycle" methods.
+ 	//		junit.jupiter.execution.timeout.beforeall.method.default 	- Default timeout for "@BeforeAll" methods.
+ 	//		junit.jupiter.execution.timeout.beforeeach.method.default 	- Default timeout for "@BeforeEach" methods.
+ 	//		junit.jupiter.execution.timeout.aftereach.method.default 	- Default timeout for "@AfterEach" methods.
+ 	//		junit.jupiter.execution.timeout.afterall.method.default 	- Default timeout for "@AfterAll" methods.
+ 	//
+ 	//
+ 	//	More specific configuration parameters override less specific ones.
+ 	//
+ 	//	For example,
+ 	//
+ 	//		junit.jupiter.execution.timeout.test.method.default overrides junit.jupiter.execution.timeout.testable.method.default
+ 	//		which overrides junit.jupiter.execution.timeout.default.
+ 	//
+ 	//
+ 	//	Values must be in the following, case-insensitive format: [ ns | μs | ms | s | m | h | d ].
+ 	//	The space between the number and the unit may be omitted.
+ 	//	Specifying no unit is equivalent to using seconds.
+ 	//
+ 	//	-------------------------------------------------------------------------------
+ 	//			Value         			Equivalent annotation
+ 	//	-------------------------------------------------------------------------------
+ 	//			42    				@Timeout(42)
+ 	//			42 ns 				@Timeout(value = 42, unit = NANOSECONDS)
+ 	//			42 μs 				@Timeout(value = 42, unit = MICROSECONDS)
+ 	//			42 ms 				@Timeout(value = 42, unit = MILLISECONDS)
+ 	//			42 s  				@Timeout(value = 42, unit = SECONDS)
+ 	//			42 m  				@Timeout(value = 42, unit = MINUTES)
+ 	//			42 h 				@Timeout(value = 42, unit = HOURS)
+ 	//			42 d  				@Timeout(value = 42, unit = DAYS)
+ 	//
+	// ---------------------------------------------------------------------------------- //
+
+	@Timeout(value=3, unit=TimeUnit.SECONDS)
+
+	
+
+	// ---------------------------------------------------------------------------------- //
+	// @Order
+	// ---------------------------------------------------------------------------------- //
+	// 	is an annotation that is used to configure the order
+	//	in which the annotated element (i.e., field or method) 
+	//	should be evaluated or executed relative to other elements of the same category.
+	//
+	//	When used with org.junit.jupiter.api.extension.RegisterExtension @RegisterExtension,
+ 	//	the category applies to extension fields.
+ 	//
+ 	//	When used with the "OrderAnnotation" MethodOrderer, the category applies to test methods.
+ 	//
+ 	// 	If @Order is not explicitly declared on an element,
+ 	//	the default order value will be assigned to the element.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	Default order value for elements not explicitly annotated with @Order,
+	//	equal to the value of Integer.MAX_VALUE / 2.
+	//
+	// ---------------------------------------------------------------------------------- //
+
+	@Order(1)
+
+	void testXXX() {
+		log.debug("♥ testXXX() invoked.");
+		
+	} // testXXX
+
+
+
+	// ---------------------------------------------------------------------------------- //
+	// @AfterEach
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to signal that the annotated method should be executed
+	//	after each 
+	//		@Test, @RepeatedTest, @ParameterizedTest, @TestFactory, @TestTemplate method
+	//	in the current test class.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Method Signatures *
+	//
+	// 	1. 	Methods must have a "void" return type,
+	//	2. 	Methods must "not" be "private", and must "not" be "static".
+ 	//	3. 	Methods may optionally declare parameters to be resolved by
+ 	//		org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers.
+	// ---------------------------------------------------------------------------------- //
+	
+	@AfterEach
+
+	void afterEach() {
+		log.debug("♥ afterEach() invoked.");
+		
+	} // afterEach
+
+	
+
+	// ---------------------------------------------------------------------------------- //
+	// @AfterAll
+	// ---------------------------------------------------------------------------------- //
+	// 	is used to signal that the annotated method should be executed
+	//	after all tests in the current test class.
+ 	//
+ 	//	In contrast to @AfterEach methods,
+ 	//	This methods are only executed once for a given test class.
+	// ---------------------------------------------------------------------------------- //
+	//
+	//	* Method Signatures *
+	//
+	// 	1. 	Methods must have a "void" return type,
+ 	//	2. 	Methods must "not" be "private", and must be "static" by default.
+ 	//		Consequently, methods are not supported in @Nested test classes or as interface default methods
+ 	//		unless the test class is annotated with @TestInstance(Lifecycle.PER_CLASS).
+ 	//	3. 	Methods may optionally declare parameters to be resolved by
+ 	//		org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers.
+	// ---------------------------------------------------------------------------------- //
+
+	@AfterAll
+
+	static void afterAll() {
+		log.debug("♥ afterAll() invoked.");
+		
+	} // afterAll
+
+} // end class
